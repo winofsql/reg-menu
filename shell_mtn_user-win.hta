@@ -1,0 +1,2026 @@
+<meta http-equiv="content-type" content="text/html; charset=SHIFT_JIS">
+<SCRIPT language="VBScript">
+Dim strPath
+strPath = "CLSID\{6100C8E5-973E-40B7-8254-807855D2C355}\shell\000b\shell"
+
+Dim ErrorMessage
+REM **********************************************************
+REM シングルクォートで囲む
+REM **********************************************************
+Function Ss( strValue )
+
+	Ss = "'" & strValue & "'"
+
+End Function
+
+REM **********************************************************
+REM ダブルクォートで囲む
+REM **********************************************************
+Function Dd( strValue )
+
+	Dd = """" & strValue & """"
+
+End function
+
+REM **********************************************************
+REM 文字列より機械的にフォルダ部分を取得する
+REM **********************************************************
+Function GetStringDir( strValue )
+
+	Dim aData,I,str
+
+	strValue = Replace( strValue, """", "" )
+	aData = Split( strValue, "\" )
+	str = ""
+	For I = 0 to Ubound( aData ) - 1
+		if I <> 0 then
+			str = str & "\"
+		end if
+		str = str & aData(I)
+	Next
+
+	GetStringDir = str
+
+End Function
+
+REM **********************************************************
+REM 文字列のバイト計算
+REM **********************************************************
+Function ByteLen( strTarget )
+
+	Dim i,nLen,nRet,strMoji,nAsc
+
+	nRet = 0
+
+	nLen = Len( strTarget )
+
+	For i = 1 to nLen
+		nRet = nRet + 2
+		strMoji = Mid( strTarget, i, 1 )
+		nAsc = Asc( strMoji )
+		if &H20 <= nAsc and nAsc <= &H7E then
+			nRet = nRet - 1
+		end if
+		if &HA1 <= nAsc and nAsc <= &HDF then
+			nRet = nRet - 1
+		end if
+	Next
+
+	ByteLen = nRet
+
+End Function
+
+REM **********************************************************
+REM 指定数、指定文字列左側を埋める
+REM **********************************************************
+Function Lpad( strValue, str, nLen )
+
+	Lpad = Right( String(nLen,str) & strValue, nLen )
+
+End Function
+Function LpadB( strValue, str, nLen )
+
+	Dim strWork,nLen2
+	
+	strWork = Right( String(nLen,str) & strValue, nLen )
+	nLen2 = nLen
+
+	Do While ByteLen( strWork ) > nLen
+		nLen2 = nLen2 - 1
+		if nLen2 <= 0 then
+			Exit Do
+		end if
+		strWork = Right( String(nLen,str) & strValue, nLen2 )
+	Loop
+	LpadB = strWork
+
+End Function
+
+REM **********************************************************
+REM 指定数、指定文字列右側を埋める
+REM **********************************************************
+Function Rpad( strValue, str, nLen )
+
+	Rpad = Left( strValue & String(nLen,str), nLen )
+
+End Function
+Function RpadB( strValue, str, nLen )
+
+	Dim strWork,nLen2
+
+	strWork = Left( strValue & String(nLen,str), nLen )
+	nLen2 = nLen
+
+	Do While ByteLen( strWork ) > nLen
+		nLen2 = nLen2 - 1
+		if nLen2 <= 0 then
+			Exit Do
+		end if
+		strWork = Left( strValue & String(nLen,str), nLen2 )
+	Loop
+	RpadB = strWork
+
+End function
+
+REM **********************************************************
+REM 正規表現のトリム
+REM **********************************************************
+Function RegTrim( strValue )
+
+	Dim regEx, str
+
+	Set regEx = New RegExp
+	regEx.IgnoreCase = True
+	regEx.Pattern = "^[　\s]+"
+	str = regEx.Replace( strValue, "" )
+	regEx.Pattern = "[　\s]+$"
+	RegTrim = regEx.Replace( str, "" )
+
+End Function
+
+
+REM **********************************************************
+REM Wscript で実行された場合はメッセージを表示して終了
+REM **********************************************************
+Function WscriptQuit( )
+
+	if ScriptType <> 1 then
+		Exit Function
+	end if
+
+	Dim str
+
+	str = WScript.FullName
+	str = Right( str, 11 )
+	str = Ucase( str )
+	if str <> "CSCRIPT.EXE" then
+		strMessage = "コマンドプロンプトより cscript " & WScript.ScriptFullName
+		strMessage = strMessage & " と指定して実行して下さい　　　" & vbCrLf & vbCrLf
+		strMessage = strMessage & "( この文字列をクリップボードにコピーしたい場合は"
+		strMessage = strMessage & " ctrl+c です )"
+		WScript.Echo strMessage
+		WScript.Quit
+	end if
+
+End Function
+
+REM **********************************************************
+REM Wscript で実行された場合は Cscript で実行しなおす
+REM **********************************************************
+Function Crun( )
+
+	if ScriptType <> 1 then
+		Exit Function
+	end if
+
+	Dim str
+
+	str = WScript.FullName
+	str = Right( str, 11 )
+	str = Ucase( str )
+	if str <> "CSCRIPT.EXE" then
+		str = WScript.ScriptFullName
+		GetWshShell
+		strParam = " "
+		For I = 0 to Wscript.Arguments.Count - 1
+			if instr(Wscript.Arguments(I), " ") < 1 then
+				strParam = strParam & Wscript.Arguments(I) & " "
+			else
+				strParam = strParam & Dd(Wscript.Arguments(I)) & " "
+			end if
+		Next
+		Call WshShell.Run( "cmd.exe /c cscript.exe " & Dd(str) & strParam & " & pause", 3 )
+		WScript.Quit
+	end if
+
+End Function
+Function Crun2( nCol )
+
+	if ScriptType <> 1 then
+		Exit Function
+	end if
+
+	Dim str
+
+	str = WScript.FullName
+	str = Right( str, 11 )
+	str = Ucase( str )
+	if str <> "CSCRIPT.EXE" then
+		str = WScript.ScriptFullName
+		GetWshShell
+		strParam = " "
+		For I = 0 to Wscript.Arguments.Count - 1
+			if instr(Wscript.Arguments(I), " ") < 1 then
+				strParam = strParam & Wscript.Arguments(I) & " "
+			else
+				strParam = strParam & Dd(Wscript.Arguments(I)) & " "
+			end if
+		Next
+		Call WshShell.Run( "cmd.exe /c mode con: cols=" _
+			& nCol & " & cscript.exe " & Dd(str) & strParam & " & pause", 3 )
+		WScript.Quit
+	end if
+
+End function
+
+REM **********************************************************
+REM ソース内のテキストリソースを取得
+REM **********************************************************
+Function GetInline( strName )
+
+	GetInline = RegTrim( getResource( strName ) ) & vbCrLf
+
+End Function
+
+REM **********************************************************
+REM 実行中のスクリプトのタイプ
+REM 1:WSH, 2:HTA, 3:ASP, 0:不明
+REM **********************************************************
+Function ScriptType( )
+
+	Dim nType
+
+	nType = 0
+
+	if IsObject( Wscript ) then
+		nType = 1
+	else
+		if IsObject( window ) then
+			nType = 2
+		else
+			if IsObject( Server ) then
+				nType = 3
+			end if
+		end if
+	end if
+
+	ScriptType = nType
+
+End Function
+
+Sub print( strData )
+
+	Dim strType
+
+	strType = ScriptType( )
+
+	Select Case strType
+		Case 1
+			Wscript.Echo strData
+		Case 2
+			document.write strData
+		Case 3
+			Response.Write strData
+	End Select
+
+End Sub
+
+Sub print2( strData )
+
+	Dim strType
+
+	strType = ScriptType( )
+
+	Select Case strType
+		Case 1
+			Wscript.Echo strData & vbCrLf
+		Case 2
+			document.write strData & vbCrLf
+		Case 3
+			Response.Write strData & vbCrLf
+	End Select
+
+End Sub
+
+Sub print3( strData )
+
+	Dim strType
+
+	strType = ScriptType( )
+
+	Select Case strType
+		Case 1
+			Wscript.Echo strData & "<br>" & vbCrLf
+		Case 2
+			document.write strData & "<br>" & vbCrLf
+		Case 3
+			Response.Write strData & "<br>" & vbCrLf
+	End Select
+
+End Sub
+
+REM **********************************************************
+REM 文字列を指定して、変数にオブシェクトを作成させる
+REM **********************************************************
+Function GetObj( strTarget, strObjectName )
+
+	Dim ExecuteString
+
+	ExecuteString = "Dim " & strTarget & " : "
+	ExecuteString = ExecuteString & "Set " & strTarget & " = "
+
+	Select Case ScriptType
+		Case 1
+			ExecuteString = ExecuteString & _
+			"WScript.CreateObject("
+		Case 2
+			ExecuteString = ExecuteString & _
+			"CreateObject("
+		Case 3
+			ExecuteString = ExecuteString & _
+			"Server.CreateObject("
+		Case Else
+			ExecuteString = ExecuteString & _
+			"CreateObject("
+	End Select
+
+	ExecuteString = ExecuteString & Dd( strObjectName ) & ")"
+
+	ExecuteGlobal ExecuteString
+
+End Function
+
+REM **********************************************************
+REM FileSystemObject の取得
+REM ExecuteGlobal で定義されたグローバルな変数は
+REM ローカルスコープで即参照できない
+REM **********************************************************
+Function GetFso( )
+
+	if not IsObject( Fso ) then
+		Call GetObj( "Fso", "Scripting.FileSystemObject" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM テキストファイル一括取得
+REM **********************************************************
+Function GetTextFile( strPath )
+
+	GetFso
+
+	Dim objHandle
+
+	on error resume next
+	Set objHandle = Fso.OpenTextFile( strPath, 1 )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		GetTextFile = ""
+	else
+		GetTextFile = objHandle.ReadAll
+		objHandle.Close
+	end if
+	on error goto 0
+
+End Function
+
+Function GetTextFileUnicode( strPath )
+
+	GetFso
+
+	Dim objHandle
+
+	on error resume next
+	Set objHandle = Fso.OpenTextFile( strPath, 1, , True )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		GetTextFileUnicode = ""
+	else
+		GetTextFileUnicode = objHandle.ReadAll
+		objHandle.Close
+	end if
+	on error goto 0
+
+End Function
+
+REM **********************************************************
+REM テキストファイル一括書き込み
+REM **********************************************************
+Function PutTextFile( strPath, strValue )
+
+	GetFso
+
+	Dim objHandle
+
+	on error resume next
+	Set objHandle = Fso.CreateTextFile( strPath, True )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+	else
+		objHandle.Write( strValue )
+		objHandle.Close
+	end if
+	on error goto 0
+
+End Function
+
+REM **********************************************************
+REM テキストファイル一括書き込み( Unicode )
+REM **********************************************************
+Function PutTextFileUnicode( strPath, strValue )
+
+	GetFso
+
+	Dim objHandle
+
+	on error resume next
+	Set objHandle = Fso.CreateTextFile( strPath, True, True )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+	else
+		objHandle.Write( strValue )
+		objHandle.Close
+	end if
+	on error goto 0
+
+End Function
+
+REM **********************************************************
+REM WScript.Shell の取得
+REM **********************************************************
+Function GetWshShell( )
+
+	if not IsObject( WshShell ) then
+		Call GetObj( "WshShell", "WScript.Shell" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM 非同期実行
+REM **********************************************************
+Function RunAsync( strCommand )
+
+	GetWshShell
+	Call WshShell.Run( strCommand )
+
+End Function
+
+REM **********************************************************
+REM 同期実行( 必要ならコマンドプロンプトを開く )
+REM **********************************************************
+Function RunSync( strCommand )
+
+	GetWshShell
+	Call WshShell.Run( strCommand, , True )
+
+End Function
+
+REM **********************************************************
+REM 同期実行( コマンドプロンプトを開かない )
+REM **********************************************************
+Function RunSync2( strCommand )
+
+	GetWshShell
+	Call WshShell.Run( strCommand, 0, True )
+
+End Function
+
+REM **********************************************************
+REM CMD.EXE 実行
+REM **********************************************************
+Function RunCmd( nCols, strCommand )
+
+	strCommand = "cmd.exe /c mode con: cols=" & nCols & " & " & strCommand
+	GetWshShell
+	Call WshShell.Run( strCommand, 3 )
+
+End Function
+Function RunCmdOpen( nCols, strCommand )
+
+	strCommand = "cmd.exe /k mode con: cols=" & nCols & " & " & strCommand
+	GetWshShell
+	Call WshShell.Run( strCommand, 3 )
+
+End Function
+
+REM **********************************************************
+REM バッチファイル 実行
+REM **********************************************************
+Function RunBat( strName )
+
+	Dim strPath,strCommand
+
+	strPath = Tempdir & "\" & strName & ".bat"
+	Call PutTextFile( strPath, GetInline(strName) )
+	strCommand = "cmd.exe /c " & Dd( strPath )
+	RunSync( strCommand )
+
+End Function
+
+REM **********************************************************
+REM バッチファイル パラメータ(置き換え)実行
+REM **********************************************************
+Function RunBatParam( strName, bPause, strParamList )
+
+	Dim strPath,strCommand,aParam,str,I
+
+	aParam = Split(strParamList,",")
+
+	strPath = Tempdir & "\" & strName & ".bat"
+	str = GetInline(strName)
+	For I = 0 to Ubound( aParam ) step 2
+		str = Replace( str, aParam(I), aParam(I+1) )
+	Next
+	Call PutTextFile( strPath, str )
+	strCommand = "cmd.exe /c " & Dd( strPath )
+	RunSync( strCommand )
+
+End Function
+
+REM **********************************************************
+REM PHP 実行
+REM **********************************************************
+Function RunPhp( strName, bPause )
+
+	Dim strPath,strCommand
+
+	strPath = Tempdir & "\" & strName & ".php"
+	Call PutTextFile( strPath, GetInline(strName) )
+	if bPause then
+		strCommand = "cmd.exe /c php.exe " & Dd( strPath ) & " & pause"
+	else
+		strCommand = "php.exe " & Dd( strPath )
+	end if
+	RunSync( strCommand )
+
+End Function
+
+REM **********************************************************
+REM PHP パラメータ(置き換え)実行
+REM **********************************************************
+Function RunPhpParam( strName, bPause, strParamList )
+
+	Dim strPath,strCommand,aParam,str,I
+
+	aParam = Split(strParamList,",")
+
+	strPath = Tempdir & "\" & strName & ".php"
+	str = GetInline(strName)
+	For I = 0 to Ubound( aParam ) step 2
+		str = Replace( str, aParam(I), aParam(I+1) )
+	Next
+	Call PutTextFile( strPath, str )
+	if bPause then
+		strCommand = "cmd.exe /c php.exe " & Dd( strPath ) & " & pause"
+	else
+		strCommand = "php.exe " & Dd( strPath )
+	end if
+	RunSync( strCommand )
+
+End Function
+
+REM **********************************************************
+REM XCOPY で新しいファイルのみコピー
+REM **********************************************************
+Function CopyNewfile(SourceDir,DestinationDir)
+
+	Dim nRet
+
+	GetWshShell
+
+	ExecCommand = "xcopy.exe """ & SourceDir & """ """ & DestinationDir & """ /D /E /C /S /Y"
+
+	RunSync( ExecCommand )
+
+End function
+Function CopyNewfileNoSubdir(SourceDir,DestinationDir)
+
+	Dim nRet
+
+	GetWshShell
+
+	ExecCommand = "xcopy.exe """ & SourceDir & """ """ & DestinationDir & """ /D /C /Y"
+
+	RunSync( ExecCommand )
+
+End function
+
+REM **********************************************************
+REM XCOPY で全てのファイルコピー
+REM **********************************************************
+Function CopyAllfile(SourceDir,DestinationDir)
+
+	Dim nRet
+
+	GetWshShell
+
+	ExecCommand = "xcopy.exe """ & SourceDir & """ """ & DestinationDir & """ /E /C /S /Y"
+
+	RunSync( ExecCommand )
+
+End function
+Function CopyAllfileNoSubdir(SourceDir,DestinationDir)
+
+	Dim nRet
+
+	GetWshShell
+
+	ExecCommand = "xcopy.exe """ & SourceDir & """ """ & DestinationDir & """ /C /Y"
+
+	RunSync( ExecCommand )
+
+End function
+
+REM **********************************************************
+REM WScript.Network の取得
+REM **********************************************************
+Function GetWshNetwork( )
+
+	if not IsObject( WshNetwork ) then
+		Call GetObj( "WshNetwork", "WScript.Network" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM ディクショナリオブジェクトの取得
+REM **********************************************************
+Function GetDic( )
+
+	if not IsObject( Dic ) then
+		Call GetObj( "Dic", "Scripting.Dictionary" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM Shell オブジェクトの取得
+REM **********************************************************
+Function GetShell( )
+
+	if not IsObject( Shell ) then
+		Call GetObj( "Shell", "Shell.Application" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM フォルダ選択
+REM **********************************************************
+Function SelectDir( strTitle )
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	GetShell
+
+	Dim obj
+
+	Set obj = Shell.BrowseForFolder( 0, strTitle, &H4B, 0 )
+	if obj is nothing then
+		SelectDir = ""
+		Exit Function
+	end if
+	if not obj.Self.IsFileSystem then
+		ErrorMessage = "ファイルシステムではありません"
+		SelectDir = ""
+		Exit Function
+	end if
+
+	SelectDir = obj.Self.Path
+
+End Function
+
+Function SelectDirAndFile( strTitle )
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	GetShell
+
+	Dim obj
+
+	on error resume next
+	Set obj = Shell.BrowseForFolder( 0, strTitle, &H4B+&h4000, 0 )
+	if Err.Number <> 0 then
+		ErrorMessage = "ファイルが選択されました"
+		SelectDirAndFile = ""
+		Exit Function
+	end if
+	on error goto 0
+	if obj is nothing then
+		SelectDirAndFile = ""
+		Exit Function
+	end if
+	if not obj.Self.IsFileSystem then
+		ErrorMessage = "ファイルシステムではありません"
+		SelectDirAndFile = ""
+		Exit Function
+	end if
+
+	SelectDirAndFile = obj.Self.Path
+
+End Function
+
+REM **********************************************************
+REM エクスプローラで開く
+REM **********************************************************
+Function OpenDir( strPath )
+
+	strCommand = "explorer.exe  /e," & Dd(strPath)
+	RunSync(strCommand)
+
+End Function
+
+REM **********************************************************
+REM ADO Connection オブジェクトの取得
+REM **********************************************************
+Function GetCn( )
+
+	if not IsObject( Cn ) then
+		Call GetObj( "Cn", "ADODB.Connection" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM ADO Recordset オブジェクトの取得
+REM **********************************************************
+Function GetRs( )
+
+	if not IsObject( Rs ) then
+		Call GetObj( "Rs", "ADODB.Recordset" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM ADO Stream オブジェクトの取得
+REM **********************************************************
+Function GetStream( )
+
+	if not IsObject( Stream ) then
+		Call GetObj( "Stream", "ADODB.Stream" )
+	end if
+
+End Function
+
+REM **********************************************************
+REM ADOX.Catalog の取得
+REM **********************************************************
+Function GetAdox( )
+
+	if not IsObject( Adox ) then
+		Call GetObj( "Adox", "ADOX.Catalog" )
+	end if
+
+End Function
+
+REM End Set
+
+REM **********************************************************
+REM カレントディレクトリを返す
+REM **********************************************************
+Function CurDir( )
+
+	GetWshShell
+
+	CurDir = WshShell.CurrentDirectory
+
+End Function
+
+REM **********************************************************
+REM スクリプトが存在する場所を返す
+REM **********************************************************
+Function ScriptDir( )
+
+	Dim obj,strPath,aData,I
+
+	ScriptDir = ""
+
+	Select Case ScriptType
+		Case 1
+			GetFso
+
+			strPath = WScript.ScriptFullName
+			Set obj = Fso.GetFile( strPath )
+			Set obj = obj.ParentFolder
+			ScriptDir = obj.Path
+		Case 2
+			strPath = window.location
+			aData = Split( strPath, "/" )
+			strPath = ""
+			For I = 3 to Ubound( aData ) - 1
+				if I <> 3 then
+					strPath = strPath & "\"
+				end if
+				strPath = strPath & aData( I )
+			Next
+			ScriptDir = strPath
+		Case 3
+			ScriptDir = Server.MapPath( "./" )
+		Case Else
+	End Select
+
+End Function
+
+REM **********************************************************
+REM Shell フォルダを返す
+REM **********************************************************
+Function GetShellDir( nID )
+
+	Dim objFolder,objFolderItem
+
+	GetShell
+
+	Set objFolder = Shell.Namespace(nID)
+	Set objFolderItem = objFolder.Self
+	GetShellDir = objFolderItem.Path
+
+End Function
+
+REM **********************************************************
+REM プログラムフォルダを返す ( Program Files )
+REM **********************************************************
+Function ProgDir( )
+	ProgDir = GetShellDir( &H26 )
+End Function
+
+REM **********************************************************
+REM テンプレートフォルダを返す
+REM **********************************************************
+Function TemplateDir( )
+	TemplateDir = GetShellDir( &H15 )
+End Function
+
+REM **********************************************************
+REM ユーザーフォルダを返す
+REM **********************************************************
+Function UserDir( )
+	UserDir = GetShellDir( &H28 )
+End Function
+
+REM **********************************************************
+REM テンポラリフォルダを返す
+REM **********************************************************
+Function TempDir( )
+	GetFso
+	TempDir = Fso.GetSpecialFolder(2)
+End Function
+
+REM **********************************************************
+REM Windows ディレクトリの取得
+REM **********************************************************
+Function WinDir( )
+
+	WinDir = GetShellDir( &H24 )
+
+if False then
+	Dim strComputer,objWMIService,colOSes,objOS
+
+	strComputer = "."
+	Set objWMIService = GetObject("winmgmts:" _
+	 & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+ 
+	Set colOSes = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
+	For Each objOS in colOSes
+		WinDir = objOS.WindowsDirectory
+	Next
+end if
+
+End Function
+
+REM **********************************************************
+REM Windows System ディレクトリの取得
+REM **********************************************************
+Function SysDir( )
+
+	SysDir = GetShellDir( &H25 )
+
+if False then
+	Dim strComputer,objWMIService,colOSes,objOS
+
+	strComputer = "."
+	Set objWMIService = GetObject("winmgmts:" _
+	 & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+ 
+	Set colOSes = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
+	For Each objOS in colOSes
+		SysDir = objOS.SystemDirectory
+	Next
+end if
+
+End Function
+
+REM **********************************************************
+REM SpecialFolder の取得
+REM **********************************************************
+Function GetSpecialFolder( strName )
+	GetWshShell
+	GetSpecialFolder = WshShell.SpecialFolders(strName)
+End Function
+
+REM **********************************************************
+REM SendTo ディレクトリの取得
+REM **********************************************************
+Function SendtoDir( )
+	SendtoDir = GetSpecialFolder("SendTo")
+End Function
+
+REM **********************************************************
+REM お気に入りディレクトリの取得
+REM **********************************************************
+Function FavDir( )
+	FavDir = GetSpecialFolder("Favorites")
+End Function
+
+REM **********************************************************
+REM デスクトップディレクトリの取得
+REM **********************************************************
+Function DesktopDir( )
+	DesktopDir = GetSpecialFolder("Desktop")
+End Function
+
+REM **********************************************************
+REM StartMenu ディレクトリの取得
+REM **********************************************************
+Function MenuDir( )
+	MenuDir = GetSpecialFolder("StartMenu")
+End Function
+
+REM **********************************************************
+REM MyDocuments ディレクトリの取得
+REM **********************************************************
+Function MyDocDir( )
+	MyDocDir = GetSpecialFolder("MyDocuments")
+End Function
+ 
+REM **********************************************************
+REM スタートアップディレクトリの取得
+REM **********************************************************
+Function StartupDir( )
+	StartupDir = GetSpecialFolder("Startup")
+End Function
+ 
+REM **********************************************************
+REM ユーザ名の取得
+REM **********************************************************
+Function GetUser( )
+	GetWshNetwork
+	GetUser = WshNetwork.UserName
+End Function
+
+REM **********************************************************
+REM コンピュータ名の取得
+REM **********************************************************
+Function GetCpname( )
+	GetWshNetwork
+	GetCpname = WshNetwork.ComputerName
+End Function
+
+REM **********************************************************
+REM メッセージボックス
+REM **********************************************************
+Function OkCancel( str )
+
+	Dim ret
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	if vbOK = MsgBox( str & "", vbOKCancel, "laylaClass" ) then
+		OkCancel = True
+	else
+		OkCancel = False
+	end if
+
+End Function
+
+Function YesNo( str )
+
+	Dim ret
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	if vbYes = MsgBox( str & "", vbYesNo, "laylaClass" ) then
+		YesNo = True
+	else
+		YesNo = False
+	end if
+
+End Function
+
+Function MsgOk( str )
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	Call MsgBox( str & "", 0, "laylaClass" )
+
+End Function
+
+Function MsgErr( str )
+
+	if ScriptType <> 3 then
+	else
+		Exit Function
+	end if
+
+	Call MsgBox( str & "", vbOKOnly + vbExclamation, "laylaClass" )
+
+End Function
+
+REM ************************************************
+REM 指定範囲の整数の乱数を取得
+REM ************************************************
+Function Random( nMin, nMax )
+
+	Randomize
+	Random = nMin + Int(Rnd * (nMax - nMin + 1))
+
+End function
+
+Function SameRandom( nMin, nMax )
+
+	SameRandom = nMin + Int(Rnd * (nMax - nMin + 1))
+
+End function
+
+REM **********************************************************
+REM 文字列が指定文字グループのみで構成されているか
+REM **********************************************************
+Function IsGroup( strTarget, strGroup )
+
+	Dim nWorkLen,I,strChar
+
+	if strTarget & "" <> "" then
+	else
+		IsGroup = True
+		Exit Function
+	end if
+
+	nWorkLen = Len( strTarget )
+	For I = 1 to nWorkLen
+		strChar = Mid( strTarget, I, 1 )
+		if InStr( strGroup, strChar ) = 0 then
+			IsGroup = False
+			Exit Function
+		end if
+	Next
+
+	IsGroup = True
+
+End Function
+
+REM **********************************************************
+REM 文字列グループの取得
+REM **********************************************************
+Function GroupString( nGroup )
+
+	Dim strWork
+
+	Select Case nGroup
+REM 0 ～ 9
+		Case 1
+			GroupString = "0123456789"
+REM 英字
+		Case 2
+			GroupString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+REM 半角カナ
+		Case 3
+			GroupString = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｬｭｮｯﾞﾟｰ｡｢｣､･"
+REM 半角上記以外
+		Case 4
+			GroupString = " @`!#$%&'()*+,-./:;<=>?[\]^_{|}~" & Chr(&h22)
+REM 0 ～ 9
+		Case 5
+			GroupString = "０１２３４５６７８９"
+REM 英字
+		Case 6
+			GroupString = "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ"
+REM 半角カナ
+		Case 7
+			GroupString = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォャュョッ゛゜ー。「」、・"
+REM 半角上記以外
+		Case 8
+			GroupString = "　＠｀！＃＄％＆’（）＊＋，－．／：；＜＝＞？［￥］＾＿｛｜｝～”"
+		Case Else
+			GroupString = ""
+	End Select
+
+End Function
+
+REM ************************************************
+REM 半角を全角に変換
+REM ************************************************
+Function Han2Zen( strValue )
+
+	Dim strRet,strTarget1,strTarget2,i,nLen
+
+	strRet = strValue
+
+	strTarget1 = GroupString( 1 )
+	strTarget2 = GroupString( 5 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 2 )
+	strTarget2 = GroupString( 6 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 3 )
+	strTarget2 = GroupString( 7 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 4 )
+	strTarget2 = GroupString( 8 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	Han2Zen = strRet
+
+End function
+
+REM ************************************************
+REM 全角を半角に変換
+REM ************************************************
+Function Zen2Han( strValue )
+
+	Dim strRet,strTarget1,strTarget2,i,nLen
+
+	strRet = strValue
+
+	strTarget1 = GroupString( 5 )
+	strTarget2 = GroupString( 1 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 6 )
+	strTarget2 = GroupString( 2 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 7 )
+	strTarget2 = GroupString( 3 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	strTarget1 = GroupString( 8 )
+	strTarget2 = GroupString( 4 )
+
+	nLen = Len(strTarget1)
+
+	For i = 1 to nLen
+		strRet = Replace(strRet,Mid(strTarget1,i,1), Mid(strTarget2,i,1) )
+	Next
+
+	Zen2Han = strRet
+
+End function
+
+REM ************************************************
+REM 文字列(日付形式を含む)から整数
+REM 通常文字列は 0 になる
+REM ************************************************
+Function AtoI( strValue )
+
+	on error resume next
+	AtoI = CLng( strValue )
+	if Err.Number <> 0 then
+		Err.Clear
+		strValue = DateValue( strValue )
+		if Err.Number <> 0 then
+			AtoI = 0
+		else
+			AtoI = CLng( strValue )
+		end if
+	end if
+	on error goto 0
+
+End function
+
+REM ************************************************
+REM 整数から日付文字列を取得
+REM ************************************************
+Function ItoDate( nData )
+
+	nData = Fix(nData)
+	ItoDate = Cdate(nData) & ""
+
+End function
+
+REM ************************************************
+REM 日付表現の経過日数を取得
+REM ************************************************
+Function DateSub( vDate2, vDate1 )
+
+	vDate2 = DateValue( vDate2 & "" )
+	vDate1 = DateValue( vDate1 & "" )
+	DateSub = CLng( vDate2 ) - CLng( vDate1 )
+
+End function
+
+REM **********************************************************
+REM 文字列を指定して、変数にオブシェクトを作成させる
+REM **********************************************************
+Function GetWmi( strTarget )
+
+	Dim ExecuteString
+
+	ExecuteString = "Dim " & strTarget & " : "
+	ExecuteString = ExecuteString & "Set " & strTarget & " = "
+	ExecuteString = ExecuteString & "GetObject("
+	ExecuteString = ExecuteString & Dd("winmgmts:\\.\root\cimv2")
+	ExecuteString = ExecuteString & ")"
+
+	ExecuteGlobal ExecuteString
+
+End Function
+
+REM **********************************************************
+REM OS バージョンの取得
+REM **********************************************************
+Function GetOSVersion( )
+
+	GetWmi("Wmi")
+
+	Dim colTarget,str,aData,I,nTarget
+
+	Set colTarget = Wmi.ExecQuery( "select Version from Win32_OperatingSystem" )
+	For Each objRow in colTarget
+		str = objRow.Version
+	Next
+
+	aData = Split( str, "." )
+	For I = 0 to Ubound( aData )
+		if I > 1 then
+			Exit For
+		end if
+		if I > 0 then
+			nTarget = nTarget & "."
+		end if
+		nTarget = nTarget & aData(I)
+	Next
+
+	GetOSVersion = CDbl( nTarget )
+
+End Function
+
+REM **********************************************************
+REM 文字列の最後の . 以降の文字列の取得
+REM **********************************************************
+Function GetExt( strValue )
+
+	Dim aData
+
+	aData = Split(strValue,".")
+	if Ubound( aData ) > 0 then
+		GetExt = aData(Ubound( aData ))
+		if Instr( GetExt, "\" ) > 0 then
+			GetExt = ""
+		end if
+	else
+		GetExt = ""
+	end if
+
+End Function
+
+REM **********************************************************
+REM 文字列の最後の . 以降の文字列の取得
+REM **********************************************************
+Function GetFileName( strValue )
+
+	Dim aData,str,I
+
+	aData = Split(strValue,"\")
+	strValue = aData(Ubound(aData))
+	aData = Split(strValue,".")
+	if Ubound( aData ) > 0 then
+		For I = 0 to Ubound(aData)-1
+			if I <> 0 then
+				GetFileName = GetFileName & "."
+			end if
+			GetFileName = GetFileName & aData(I)
+		Next
+	else
+		GetFileName = aData(0)
+	end if
+
+End Function
+
+DelChar = Chr(0)
+Sep = vbCrLf
+SORT_STRING_MAX = 1024
+
+REM **********************************************
+REM 配列追加
+REM **********************************************
+Function ArrayAdd( aTarget, strValue )
+
+	ReDim Preserve aTarget(Ubound(aTarget)+1)
+	aTarget( Ubound(aTarget) ) = strValue
+
+End Function
+
+REM **********************************************
+REM 配列挿入
+REM **********************************************
+Function ArrayInsert( aTarget, nIndex, strValue )
+
+	Dim strWork
+
+	if nIndex = -1 then
+		aTarget( 0 ) = strValue & Sep & aTarget( 0 )
+	else
+		aTarget( nIndex ) = _
+			aTarget( nIndex ) & Sep & strValue
+	end if
+	strWork = Join( aTarget, Sep )
+	aTarget = Split( strWork, Sep )
+
+End Function
+
+REM **********************************************
+REM 配列要素削除
+REM **********************************************
+Function ArrayDelete( aTarget, nIndex )
+
+	Dim strValue
+
+	aTarget( nIndex ) = DelChar
+	strValue = Join( aTarget, Sep )
+	strValue = Replace( strValue, DelChar & Sep, "" )
+	strValue = Replace( strValue, Sep & DelChar, "" )
+	aTarget = Split( strValue, Sep )
+
+End Function
+
+REM **********************************************
+REM テキストフイルより読み込み
+REM **********************************************
+Function ArrayLoad( aTarget, strPath )
+
+	Dim objHandle,strWork
+
+	GetFso
+
+	Set objHandle = Fso.OpenTextFile( strPath, 1 )
+	aTarget = Split( objHandle.ReadAll, Sep )
+	objHandle.Close
+	if aTarget( Ubound( aTarget ) ) = "" then
+		Call ArrayDelete( aTarget, Ubound( aTarget ) )
+	end if
+
+End Function
+
+REM **********************************************
+REM ソート
+REM **********************************************
+Function ArraySort( aTarget, bDesc )
+
+	Dim Rs
+
+	Set Rs = CreateObject("ADODB.Recordset")
+
+	Rs.Fields.Append "ソート", 130, SORT_STRING_MAX
+	Rs.Open
+
+	For I = 0 to Ubound( aTarget )
+		Rs.AddNew
+		Rs.Fields("ソート").Value = aTarget(I)
+		Rs.Update
+	Next
+
+	if bDesc then
+		Rs.Sort = "ソート desc"
+	else
+		Rs.Sort = "ソート"
+	end if
+
+	Rs.MoveFirst
+	aTarget = Array()
+
+	Do while not Rs.EOF
+		Call ArrayAdd( aTarget, Rs.Fields("ソート").Value )
+		Rs.MoveNext
+	Loop
+
+	Rs.Close
+
+	ArraySort = aTarget
+
+End Function
+
+REM **********************************************************
+REM 日付・時間によるキー文字列を取得
+REM **********************************************************
+Function DateKey( )
+
+	Dim strKey
+
+	strKey = Replace(Now(),"/","")
+	strKey = Replace(strKey,":","")
+	strKey = Replace(strKey," ","")
+
+	DateKey = strKey
+
+End Function
+
+Const HKEY_CLASSES_ROOT = &H80000000
+Const HKEY_CURRENT_USER = &H80000001
+Const HKEY_LOCAL_MACHINE = &H80000002
+Dim WMIRet
+Dim objRegistry
+REM **********************************************************
+REM WMI レジストリ
+REM **********************************************************
+Function LoadWMIReg( )
+
+	ErrorMessage = ""
+
+	if not IsObject( objRegistry ) then
+		' Set objRegistry = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\default:StdRegProv")
+		Set objRegistry = GetObject("Winmgmts:root\default:StdRegProv")
+	end if 
+
+End Function
+
+REM **********************************************************
+REM KEY の処理
+REM **********************************************************
+Function WMIRegCreateKey( nType, strPath )
+REM 途中のキーもなければ全て作成される
+	WMIRegCreateKey = False
+
+	LoadWMIReg
+
+	on error resume next
+	WMIRet = objRegistry.CreateKey( nType, strPath )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( ErrorMessage )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegCreateKey = True
+End Function
+Function WMIRegDeleteKey( nType, strPath )
+REM 途中のキーは削除できない
+	WMIRegDeleteKey = False
+
+	LoadWMIReg
+
+	on error resume next
+	WMIRet = objRegistry.DeleteKey( nType, strPath )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegDeleteKey = True
+End Function
+
+REM **********************************************************
+REM 値削除
+REM **********************************************************
+Function WMIRegDeleteValue( nType, strPath, strName )
+	WMIRegDeleteValue = False
+
+	LoadWMIReg
+
+	on error resume next
+	WMIRet = objRegistry.DeleteValue( nType, strPath, strName )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegDeleteValue = True
+End Function
+
+REM **********************************************************
+REM STRING の処理
+REM **********************************************************
+Function WMIRegSetStringValue( nType, strPath, strName, strValue )
+REM strValue が Empty で値を削除
+	WMIRegSetStringValue = False
+
+	LoadWMIReg
+
+	if IsEmpty( strValue ) then
+		Call WMIRegDeleteValue( nType, strPath, strName )
+		WMIRegSetStringValue = True
+		Exit Function
+	end if
+	if IsNull( strValue ) then
+		strValue = ""
+	end if
+
+	on error resume next
+	WMIRet = objRegistry.SetStringValue( nType, strPath, strName, strValue )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegSetStringValue = True
+End Function
+Function WMIRegSetStringValue2( nType, strPath, strName, strValue )
+REM strValue が Empty で値を削除
+	WMIRegSetStringValue2 = False
+
+	LoadWMIReg
+
+	if IsEmpty( strValue ) then
+		Call WMIRegDeleteValue( nType, strPath, strName )
+		WMIRegSetStringValue2 = True
+		Exit Function
+	end if
+	if IsNull( strValue ) then
+		strValue = ""
+	end if
+
+	on error resume next
+	WMIRet = objRegistry.SetMultiStringValue( nType, strPath, strName, strValue )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegSetStringValue2 = True
+End Function
+
+Function WMIRegGetStringValue( nType, strPath, strName, strValue )
+	WMIRegGetStringValue = False
+
+	LoadWMIReg
+
+	on error resume next
+	WMIRet = objRegistry.GetStringValue( nType, strPath, strName, strValue )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegGetStringValue = True
+End Function
+
+REM **********************************************************
+REM DWORD の処理
+REM **********************************************************
+Function WMIRegGetDwordValue( nType, strPath, strName )
+
+	LoadWMIReg
+
+	objRegistry.GetDwordValue nType,strPath,strName,WMIRegGetDwordValue
+
+	if IsNull( WMIRegGetDwordValue ) then
+		WMIRegGetDwordValue = Empty
+	end if
+
+End Function
+Function WMIRegSetDwordValue( nType, strPath, strName, dwValue )
+	WMIRegSetDwordValue = False
+
+	LoadWMIReg
+
+	on error resume next
+	objRegistry.SetDwordValue nType,strPath,strName,dwValue
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegSetDwordValue = True
+End Function
+
+REM **********************************************************
+REM 列挙
+REM **********************************************************
+Function WMIRegEnumKey( nType, strPath, aKeys )
+	WMIRegEnumKey = False
+
+	LoadWMIReg
+
+	on error resume next
+	WMIRet = objRegistry.EnumKey( nType, strPath, aKeys )
+	if Err.Number <> 0 then
+		ErrorMessage = Err.Description
+		Exit Function
+	end if
+	if WMIRet <> 0 then
+		ErrorMessage = Hex( WMIRet )
+		Exit Function
+	end if
+	on error goto 0
+
+	WMIRegEnumKey = True
+End Function
+
+</SCRIPT>
+<SCRIPT language="VBScript">
+
+	Dim nId,work,strEditor,strRun,strThisPath
+
+	GetWshShell
+	GetFso
+
+	strThisPath = strPath
+
+Function OpenReg( nRow )
+
+	Dim str,str1,str2
+
+	str = document.getElementById("nm"&nRow).innerText
+
+	str1 = "Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\LastKey"
+
+	str2 = "コンピューター\HKEY_CLASSES_ROOT\" & strPath & "\" & str
+
+	WshShell.RegWrite "HKCU\" & str1, str2, "REG_SZ"
+
+	Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+	Set colProcessList = objWMIService.ExecQuery _ 
+		("Select * from Win32_Process Where Name = 'regedit.exe'") 
+	For Each objProcess in colProcessList 
+		objProcess.Terminate() 
+	Next 
+
+	Call WshShell.Run( "regedit", , True )
+
+End Function
+
+Function UninstallEntry( nRow )
+
+
+	Dim str,str1,str2
+
+	str = document.getElementById("nm"&nRow).innerText
+
+	if not confirm( str & " を削除してアンインストールしますか" ) then
+		Exit Function
+	end if
+
+	WshShell.RegDelete "HKCR\" & strPath & "\" & str & "\command\"
+	WshShell.RegDelete "HKCR\" & strPath & "\" & str & "\"
+
+	alert("削除しました。このアプリケーションを再起動します　　　")
+
+	strRun = Replace(window.location&"","file:///","")
+	strRun = Replace(strRun,"/","\")
+	strRun = Replace(strRun,"%20"," ")
+
+	WshShell.Run( "mshta.exe " & Dd(strRun))
+	window.close()
+
+End Function
+
+Function ReRun()
+
+	Dim idx,str,sin,sin2,work,GroupString,Icon
+
+	For idx = 1 to nId
+		' 対象となるレジストリのキー
+		str = document.getElementById("nm"&idx).innerText
+		sin = document.getElementById("inCmd"&idx).value
+		sin2 = document.getElementById("in2"&idx).value
+		Icon = Split(sin2, ",")
+		
+
+		Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\", Icon(0), "REG_EXPAND_SZ" )
+		if Ubound(Icon) = 0 then
+			Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\Icon", "", "REG_EXPAND_SZ" )
+		else
+			on error resume next
+			Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\Icon", Icon(1) & "," & Icon(2), "REG_EXPAND_SZ" )
+			on error goto 0
+		end if
+		Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\command\", sin, "REG_EXPAND_SZ" )
+
+	Next
+
+	alert("更新しました。　　　")
+
+End Function
+
+
+Function AddRow()
+
+	Dim idx,str,sin,sin2,work,GroupString
+
+	if not Confirm("行を追加しますか") then
+		Exit Function
+	end if
+
+	' 対象となるレジストリのキー
+	if nId = 0 then
+		str = "000"
+	else
+		str = document.getElementById("nm"&nId).innerText
+		str = Right("000" & Cint(str)+1,3)
+	end if
+
+	if document.getElementById("type").value = "1" then
+		sin = "explorer.exe /e,%windir%"
+		sin2 = "　　　Windowsディレクトリ"
+	end if
+	if document.getElementById("type").value = "2" then
+		sin = "RunDLL32.EXE shell32.dll,ShellExec_RunDLL ""%windir%\System32\ActiveHours.png"""
+		sin2 = "　　　画像"
+	end if
+	if document.getElementById("type").value = "3" then
+		sin = "chrome.exe https://winofsql.jp"
+		sin2 = "　　　SQLの窓"
+	end if
+
+	Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\", sin2, "REG_EXPAND_SZ" )
+	Call WshShell.RegWrite( "HKCR\" & strPath & "\" & str & "\command\", sin, "REG_EXPAND_SZ" )
+
+
+	alert("更新しました。このアプリケーションを再起動します　　　")
+
+	strRun = Replace(window.location&"","file:///","")
+	strRun = Replace(strRun,"/","\")
+	strRun = Replace(strRun,"%20"," ")
+
+	WshShell.Run( "mshta.exe " & Dd(strRun))
+	window.close()
+
+End Function
+
+Function UpClick(nId)
+
+	Dim sin,sin2
+
+	sin = document.getElementById("inCmd"&nId).value
+	sin2 = document.getElementById("in2"&nId).value
+
+	document.getElementById("inCmd"&nId).value = document.getElementById("inCmd"&(nId-1)).value
+	document.getElementById("in2"&nId).value = document.getElementById("in2"&(nId-1)).value
+
+	document.getElementById("inCmd"&(nId-1)).value = sin
+	document.getElementById("in2"&(nId-1)).value = sin2
+
+End Function
+
+Function DownClick(nId)
+
+	Dim sin,sin2
+
+	sin = document.getElementById("inCmd"&(nId+1)).value
+	sin2 = document.getElementById("in2"&(nId+1)).value
+
+	document.getElementById("inCmd"&(nId+1)).value = document.getElementById("inCmd"&nId).value
+	document.getElementById("in2"&(nId+1)).value = document.getElementById("in2"&nId).value
+
+	document.getElementById("inCmd"&nId).value = sin
+	document.getElementById("in2"&nId).value = sin2
+
+End Function
+
+Function TestClick(nId)
+
+	Dim target
+	target = document.getElementById("inCmd"&nId).value
+	WshShell.Run( target )
+
+End Function
+
+</SCRIPT>
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title>ユーザーデスクトップアイコンメニューメンテナンス</title>
+<HTA:APPLICATION ID="Sqlwin"
+	BORDERSTYLE="sunken"
+	INNERBORDER="yes"
+	SCROLL="yes"
+	ICON="http://winofsql.jp/WinOfSql.ico"
+>
+
+<style type="text/css">
+* {
+	font-size:12px;
+}
+body {
+	margin:0;
+	background-color:forestgreen;
+}
+
+#ieex {
+	margin-top:4px;
+	margin-left:20px;
+	width:900px;
+	background-color:black;
+}
+
+#ieex td,#ieex th {
+	background-color:white;
+}
+
+
+</style>
+</head>
+<body>
+
+<br>
+
+<table style='margin-left:20px;'>
+<tr>
+<td ><input id=update type=button value="更新" onClick='Call ReRun()'></td>
+<td ><input id=update type=button value="行追加" onClick='Call AddRow()'></td>
+<td >
+<select id=type>
+<option value=1>ディレクトリ</option>
+<option value=2>拡張子実行</option>
+<option value=3>URLショートカット</option>
+</select>
+</td>
+</tr>
+</table>
+
+
+<TABLE id=ieex border=0 cellspacing=1 cellpadding=6>
+<TH></TH>
+<TH></TH>
+<TH></TH>
+<TH style='text-align:left'>コマンド</TH>
+<TH style='text-align:left'>タイトル</TH>
+<TH></TH>
+<TH></TH>
+<SCRIPT language=VBScript>
+
+Dim strValue,strGroup,nWork
+
+bRet = WMIRegEnumKey( HKEY_CLASSES_ROOT, strPath, aKeys )
+
+if not bRet then
+	document.write( "<tr><td colspan=7>データがありません</td></tr>" )
+else
+
+	nWork = 0
+	For Each data In aKeys
+		if Left(data,1) = "0" and data <> "000b" then
+			nWork = nWork + 1
+		end if
+	Next
+
+	nId = 1
+	For Each data In aKeys
+
+		if Left(data,1) = "0" and data <> "000b" then
+
+			document.write( "<tr>" & vbCrLf )
+
+			if nId = nWork then
+				document.write( "<td>" & vbCrLf )
+				document.write( "</td>" & vbCrLf )
+			else
+				document.write( "<td>" & vbCrLf )
+				document.write( "<input onClick='DownClick("& nId &")' type='button' id=down" & nId )
+				document.write( " value='▼'>" )
+				document.write( "</td>" & vbCrLf )
+			end if
+
+			if nId = 1 then
+				document.write( "<td>" & vbCrLf )
+				document.write( "</td>" & vbCrLf )
+			else
+				document.write( "<td>" & vbCrLf )
+				document.write( "<input onClick='UpClick("& nId &")' type='button' id=up" & nId )
+				document.write( " value='▲'>" )
+				document.write( "</td>" & vbCrLf )
+			end if
+
+			document.write( "<td>" & vbCrLf )
+			document.write( "<span style='cursor:pointer;color:navy' id=nm" & nId & " onClick='Call OpenReg(""" & nId & """)'>" & data & "</span>" )
+
+			document.write( "</td>" & vbCrLf )
+
+			document.write( "<td>" & vbCrLf )
+
+			work = WshShell.RegRead( "HKCR\" & strPath & "\" & data & "\command\" )
+
+			document.write( "<INPUT style='width:400px;' type=text id=inCmd"  & nId & " value='" & work & "'" & ">" & vbCrLf )
+			document.write( "</td>" & vbCrLf )
+			document.write( "<td>" & vbCrLf )
+
+			work = WshShell.RegRead( "HKCR\" & strPath & "\" & data & "\" )
+			work2 = ""
+			on error resume next
+			work2 = WshShell.RegRead( "HKCR\" & strPath & "\" & data & "\Icon" )
+			on error goto 0
+			if work2 <> "" then
+				document.write( "<INPUT style='width:300px;' type=text id=in2"  & nId & " value='" & work & "," & work2 & "'" & ">" & vbCrLf )
+			else
+				document.write( "<INPUT style='width:300px;' type=text id=in2"  & nId & " value='" & work & "'" & ">" & vbCrLf )
+			end if
+
+			document.write( "</td>" & vbCrLf )
+			document.write( "<td style='background-color:#A0A0A0;'>" & vbCrLf )
+			document.write( "<INPUT type=button value='削除' onClick='Call UninstallEntry(""" & nId & """)'>" )
+			document.write( "</td>" & vbCrLf )
+
+			document.write( "<td>" & vbCrLf )
+			document.write( "<input onClick='TestClick("& nId &")' type='button' id=test" & nId )
+			document.write( " value='実行'>" )
+			document.write( "</td>" & vbCrLf )
+
+			document.write( "</tr>" & vbCrLf )
+
+			nId = nId + 1
+
+		end if
+
+	Next
+	nId = nWork
+end if
+
+</SCRIPT>
+
+</TABLE>
+
+<br><br><br><br>
+
+
+</BODY>
+</html>
+<SCRIPT for=window event=onload language="VBScript">
+
+	window.focus()
+	top.moveTo 0, 0
+	top.resizeTo 1000, 1000
+
+</SCRIPT>
+
+<SCRIPT for=window event=onunload language="VBScript">
+
+
+</SCRIPT>
