@@ -32,3 +32,10 @@ oShellLink.Arguments = strCurPath & "\shell_mtn_user-win.hta"
 oShellLink.WindowStyle = 1
 oShellLink.WorkingDirectory = strCurPath
 oShellLink.Save
+
+set oShellLink = WshShell.CreateShortcut(strCurPath & "\ÉSÉ~î†ÉÅÉjÉÖÅ[.lnk")
+oShellLink.TargetPath = "mshta.exe"
+oShellLink.Arguments = strCurPath & "\shell_mtn_gomi.hta"
+oShellLink.WindowStyle = 1
+oShellLink.WorkingDirectory = strCurPath
+oShellLink.Save
