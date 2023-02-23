@@ -1,6 +1,6 @@
 # desktop-reg-menu
 
-![image](https://user-images.githubusercontent.com/1501327/174699814-ecebd140-0b47-49fd-8567-8c279c64f834.png)
+![image](https://user-images.githubusercontent.com/1501327/220893826-c82c807f-567b-44c7-af2b-95a8ddad5ed8.png)
 
 ![image](https://user-images.githubusercontent.com/1501327/174699842-d1f82c50-d9b7-4991-ba82-d49a4aee253d.png)
 
