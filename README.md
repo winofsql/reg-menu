@@ -10,4 +10,8 @@
 
 ![image](https://user-images.githubusercontent.com/1501327/220894149-523232bb-a31e-41cc-8798-3010d0fe823f.png)
 
+## ゴミ箱メニュー
 ![image](https://user-images.githubusercontent.com/1501327/220894647-526b20d5-d484-4507-b020-e47229f20541.png)
+
+## Windows サブメニュー
+![image](https://user-images.githubusercontent.com/1501327/221446710-4c8837d9-7c47-4253-86ae-f7cafdeb6ff8.png)
