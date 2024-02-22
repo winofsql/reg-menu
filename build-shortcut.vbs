@@ -55,6 +55,8 @@ oShellLink.Save
 WshShell.RegWrite "HKCR\CLSID\{056AD589-335E-4D3D-BBA4-195ED221CE5F}\shell\012\command\", "RunDLL32.EXE shell32.dll,ShellExec_RunDLL """ & strCurPath & "\ユーザーメニュー.lnk""", "REG_EXPAND_SZ"
 WshShell.RegWrite "HKCR\CLSID\{056AD589-335E-4D3D-BBA4-195ED221CE5F}\shell\013\command\", "RunDLL32.EXE shell32.dll,ShellExec_RunDLL """ & strCurPath & "\個人メニュー.lnk""", "REG_EXPAND_SZ"
 WshShell.RegWrite "HKCR\CLSID\{056AD589-335E-4D3D-BBA4-195ED221CE5F}\shell\014\command\", "RunDLL32.EXE shell32.dll,ShellExec_RunDLL """ & strCurPath & "\ゴミ箱メニュー.lnk""", "REG_EXPAND_SZ"
+WshShell.RegWrite "HKCR\CLSID\{056AD589-335E-4D3D-BBA4-195ED221CE5F}\shell\015\command\", "RunDLL32.EXE shell32.dll,ShellExec_RunDLL """ & strCurPath & "\ユーザーメニュー(サブ).lnk""", "REG_EXPAND_SZ"
+WshShell.RegWrite "HKCR\CLSID\{056AD589-335E-4D3D-BBA4-195ED221CE5F}\shell\016\command\", "RunDLL32.EXE shell32.dll,ShellExec_RunDLL """ & strCurPath & "\個人メニュー(サブ).lnk""", "REG_EXPAND_SZ"
 
 
 
