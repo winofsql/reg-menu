@@ -20,3 +20,6 @@
 
 ## Windows ユーザーメニュー / サブメニュー( 追加・更新・削除 )
 ![image](https://github.com/winofsql/reg-menu/assets/1501327/e6391046-e97f-45c9-8056-54e2af9bda3a)
+
+## Windows 個人用メニュー / サブメニュー( 追加・更新・削除 )
+![image](https://github.com/winofsql/reg-menu/assets/1501327/68b145e1-1edc-4a77-9010-4a4d89ac5dbf)
