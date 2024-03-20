@@ -7,7 +7,7 @@
 ![image](https://user-images.githubusercontent.com/1501327/220894250-d279dc23-1af9-42ce-925e-212098d16513.png)
 
 ## ゴミ箱メニュー
-![image](https://user-images.githubusercontent.com/1501327/220894025-cb70d0ea-da68-415b-96df-4a7ef46393df.png)
+![image](https://github.com/winofsql/reg-menu/assets/1501327/3c842247-7b87-4880-9675-56b1c4966ef7)
 
 ## Windows 主要メニュー
 ![image](https://user-images.githubusercontent.com/1501327/220894510-8ebe9e86-11c0-49ef-8763-1b7f4397a6f1.png)
