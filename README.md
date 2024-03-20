@@ -1,6 +1,6 @@
 # reg-menu
 
-## Windows 主要メニュー
+## Windows 主要メニュー( ユーザーメニュー )
 ![image](https://user-images.githubusercontent.com/1501327/220894341-c9cff12a-86d3-4289-9d55-f6113b1092f7.png)
 
 ## 個人用メニュー
@@ -18,5 +18,5 @@
 ## ゴミ箱メニュー( 追加・更新・削除 )
 ![image](https://github.com/winofsql/reg-menu/assets/1501327/718c9545-2096-482e-945f-ce71dc8b3c3c)
 
-## Windows サブメニュー( 追加・更新・削除 )
-![image](https://user-images.githubusercontent.com/1501327/221446710-4c8837d9-7c47-4253-86ae-f7cafdeb6ff8.png)
+## Windows ユーザーメニュー / サブメニュー( 追加・更新・削除 )
+![image](https://github.com/winofsql/reg-menu/assets/1501327/e6391046-e97f-45c9-8056-54e2af9bda3a)
