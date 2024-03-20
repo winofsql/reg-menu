@@ -13,7 +13,7 @@
 ![image](https://user-images.githubusercontent.com/1501327/220894510-8ebe9e86-11c0-49ef-8763-1b7f4397a6f1.png)
 
 ## 個人用メニュー( 追加・更新・削除 )
-![image](https://user-images.githubusercontent.com/1501327/220894149-523232bb-a31e-41cc-8798-3010d0fe823f.png)
+![image](https://github.com/winofsql/reg-menu/assets/1501327/5854670f-668e-44f0-8f9a-89524330cac4)
 
 ## ゴミ箱メニュー( 追加・更新・削除 )
 ![image](https://github.com/winofsql/reg-menu/assets/1501327/718c9545-2096-482e-945f-ce71dc8b3c3c)
