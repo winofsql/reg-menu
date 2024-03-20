@@ -4,7 +4,7 @@
 ![image](https://user-images.githubusercontent.com/1501327/220894341-c9cff12a-86d3-4289-9d55-f6113b1092f7.png)
 
 ## 個人用メニュー
-![image](https://user-images.githubusercontent.com/1501327/220894250-d279dc23-1af9-42ce-925e-212098d16513.png)
+![image](https://github.com/winofsql/reg-menu/assets/1501327/f1ab753e-a484-4b74-b5d8-e5f22cfbe6e1)
 
 ## ゴミ箱メニュー
 ![image](https://github.com/winofsql/reg-menu/assets/1501327/3c842247-7b87-4880-9675-56b1c4966ef7)
