@@ -27,5 +27,5 @@
 
 ※ [アイコン番号の確認](https://www.losttechnology.jp/blog/2023/06/windows-11%E3%81%AE%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3%E3%82%92%E3%81%BE%E3%81%A8%E3%82%81%E3%81%A6%E8%A6%8B%E3%81%A6%E3%81%BF%E3%82%8B%E2%91%A0/#SystemRootSystem32imageresdll)
 
-※ HP のセキュリティソフトでの実装時の条件
+※ HP のセキュリティソフトでの実装時の条件\
 ![image](https://github.com/winofsql/reg-menu/assets/1501327/e00672f6-6de8-4fb3-8e0a-900d355f42bf)
