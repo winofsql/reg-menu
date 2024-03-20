@@ -1,4 +1,4 @@
-# desktop-reg-menu
+# reg-menu
 
 ## Windows 主要メニュー
 ![image](https://user-images.githubusercontent.com/1501327/220894341-c9cff12a-86d3-4289-9d55-f6113b1092f7.png)
